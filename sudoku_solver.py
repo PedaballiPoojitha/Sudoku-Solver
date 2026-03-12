@@ -5,19 +5,22 @@ class SudokuSolver:
         self.board = board if board else [[0] * 9 for _ in range(9)]
 
     def is_valid(self, row, col, num):
+        # Check row and column
         for i in range(9):
             if self.board[row][i] == num or self.board[i][col] == num:
                 return False
 
-            box_row, box_col = 3 * (row // 3), 3 * (col // 3)
-            for i in range(box_row, box_row + 3):
-                for j in range(box_col, box_col + 3):
-                    if self.board[i][j] == num:
-                        return False
+        # Check 3x3 box
+        box_row, box_col = 3 * (row // 3), 3 * (col // 3)
+        for i in range(box_row, box_row + 3):
+            for j in range(box_col, box_col + 3):
+                if self.board[i][j] == num:
+                    return False
 
-                    return True
+        return True
 
     def solve(self):
+        # backtracking solver
         for row in range(9):
             for col in range(9):
                 if self.board[row][col] == 0:
@@ -27,10 +30,13 @@ class SudokuSolver:
                             if self.solve():
                                 return True
                             self.board[row][col] = 0
-                            return False
-                            return True
+                    # no valid number found, backtrack
+                    return False
+        # no empty cell left, puzzle solved
+        return True
 
     def generate(self, difficulty=40):
+        # fill the three diagonal 3x3 boxes with random numbers
         for box in range(0, 9, 3):
             nums = list(range(1, 10))
             random.shuffle(nums)
@@ -40,22 +46,24 @@ class SudokuSolver:
                     self.board[i][j] = nums[idx]
                     idx += 1
 
-                    self.solve()
+        # solve the partially filled board to get a full solution
+        self.solve()
 
-                    cells = [(i, j) for i in range(9) for j in range(9)]
-                    random.shuffle(cells)
-                    for i, j in cells[:difficulty]:
-                        self.board[i][j] = 0
+        # remove cells to create puzzle according to difficulty
+        cells = [(i, j) for i in range(9) for j in range(9)]
+        random.shuffle(cells)
+        for i, j in cells[:difficulty]:
+            self.board[i][j] = 0
 
     def display(self):
         for i in range(9):
             if i % 3 == 0 and i != 0:
                 print("-" * 21)
-                for j in range(9):
-                    if j % 3 == 0 and j != 0:
-                        print("|", end=" ")
-                        print(self.board[i][j] if self.board[i][j] != 0 else ".", end=" ")
-                        print()
+            for j in range(9):
+                if j % 3 == 0 and j != 0:
+                    print("|", end=" ")
+                print(self.board[i][j] if self.board[i][j] != 0 else ".", end=" ")
+            print()
 
 if __name__ == "__main__":
     print("\n=== SUDOKU SOLVER & GENERATOR ===")
@@ -85,15 +93,15 @@ if __name__ == "__main__":
                         break
                     print("Invalid input! Enter 9 digits.")
 
-                    sudoku = SudokuSolver(board)
-                    print("\nOriginal Sudoku:")
-                    sudoku.display()
+            sudoku = SudokuSolver(board)
+            print("\nOriginal Sudoku:")
+            sudoku.display()
 
-                    print("\nSolving...")
-                    if sudoku.solve():
-                        print("\nSolved Sudoku:")
-                        sudoku.display()
-                    else:
-                        print("No solution exists!")
-                    elif choice == '3':
-                        break
+            print("\nSolving...")
+            if sudoku.solve():
+                print("\nSolved Sudoku:")
+                sudoku.display()
+            else:
+                print("No solution exists!")
+        elif choice == '3':
+            break
